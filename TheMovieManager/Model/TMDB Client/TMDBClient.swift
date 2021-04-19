@@ -25,13 +25,14 @@ class TMDBClient {
         
         case getWatchlist
         case getRequestToken
+        case login
         
         //... o valor associado aqui gera o caminho completo
         var stringValue: String {
             switch self {
             case .getWatchlist: return Endpoints.base + "/account/\(Auth.accountId)/watchlist/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
-                
             case .getRequestToken: return Endpoints.base + "/authentication/token/new" + Endpoints.apiKeyParam
+            case .login: return Endpoints.base + "/authentication/token/validate_with_login" + Endpoints.apiKeyParam
             }
         }
         //esta propriedade de URL computada converte o valor da string em uma URL.
@@ -39,25 +40,8 @@ class TMDBClient {
             return URL(string: stringValue)!
         }
     }
-    //metodo para retornar a lista de observacao.
-    class func getWatchlist(completion: @escaping ([Movie], Error?) -> Void) { //o tipo passado para o manipulador de conclusao é uma matriz...
-        //Leva um unico parametro, um gerenciador de conclusao e segue as etapas para criar uma solicitacao HTTP get
-        let task = URLSession.shared.dataTask(with: Endpoints.getWatchlist.url) { data, response, error in
-            guard let data = data else {
-                completion([], error)
-                return
-            }
-            let decoder = JSONDecoder()
-            do { //analisa o JSON e é chamado de manipulador de conclusao.
-                let responseObject = try decoder.decode(MovieResults.self, from: data)//...de digite filme e o JSON é analisado em um tipo chamado resultados de filme
-                completion(responseObject.results, nil)
-            } catch {
-                completion([], error)
-            }
-        }
-        task.resume()
-    }
     
+    //get
     //metodo para retornar a lista de observacao.
     class func getRequestToken(completion: @escaping (Bool, Error?) -> Void) { //o tipo passado para o manipulador de conclusao é uma matriz...
         //Leva um unico parametro, um gerenciador de conclusao e segue as etapas para criar uma solicitacao HTTP get
@@ -73,6 +57,50 @@ class TMDBClient {
                 completion(true, nil)
             } catch {
                 completion(false, error)
+            }
+        }
+        task.resume()
+    }
+    
+    //post
+    class func login(username: String, password: String, completion: @escaping (Bool, Error?) -> Void) {
+        var request = URLRequest(url: Endpoints.login.url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body = LoginRequest(username: username, password: password, requestToken: Auth.requestToken)
+        request.httpBody = try! JSONEncoder().encode(body)
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard let data = data else {
+                completion(false, error)
+                return
+            }
+            do {
+                let decoder = JSONDecoder()
+                let responseObject = try decoder.decode(RequestTokenResponse.self, from: data)
+                Auth.requestToken = responseObject.requestToken
+                completion(true, nil)
+            } catch {
+                completion(false, error)
+            }
+        }
+        task.resume()
+    }
+    
+    //get
+    //metodo para retornar a lista de observacao.
+    class func getWatchlist(completion: @escaping ([Movie], Error?) -> Void) { //o tipo passado para o manipulador de conclusao é uma matriz...
+        //Leva um unico parametro, um gerenciador de conclusao e segue as etapas para criar uma solicitacao HTTP get
+        let task = URLSession.shared.dataTask(with: Endpoints.getWatchlist.url) { data, response, error in
+            guard let data = data else {
+                completion([], error)
+                return
+            }
+            let decoder = JSONDecoder()
+            do { //analisa o JSON e é chamado de manipulador de conclusao.
+                let responseObject = try decoder.decode(MovieResults.self, from: data)//...de digite filme e o JSON é analisado em um tipo chamado resultados de filme
+                completion(responseObject.results, nil)
+            } catch {
+                completion([], error)
             }
         }
         task.resume()

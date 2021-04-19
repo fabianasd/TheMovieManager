@@ -34,9 +34,14 @@ class LoginViewController: UIViewController {
     func handleRequestTokenResponse(success: Bool, error: Error?) {
         if success {
             print(TMDBClient.Auth.requestToken)
+            TMDBClient.login(username: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "", completion: self.handleLoginResponse(sucess:Error:))
         } else {
             print(error)
         }
+    }
+    
+    func handleLoginResponse(sucess: Bool, Error: Error?) {
+        print(TMDBClient.Auth.requestToken)
     }
     
 }
