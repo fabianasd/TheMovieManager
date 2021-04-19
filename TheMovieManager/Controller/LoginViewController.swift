@@ -23,11 +23,20 @@ class LoginViewController: UIViewController {
     }
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
-        performSegue(withIdentifier: "completeLogin", sender: nil)
+      //  performSegue(withIdentifier: "completeLogin", sender: nil)
+        TMDBClient.getRequestToken(completion: handleRequestTokenResponse(success:error:))
     }
     
     @IBAction func loginViaWebsiteTapped() {
         performSegue(withIdentifier: "completeLogin", sender: nil)
+    }
+    
+    func handleRequestTokenResponse(success: Bool, error: Error?) {
+        if success {
+            print(TMDBClient.Auth.requestToken)
+        } else {
+            print(error)
+        }
     }
     
 }
