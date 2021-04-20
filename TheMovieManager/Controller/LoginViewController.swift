@@ -23,25 +23,37 @@ class LoginViewController: UIViewController {
     }
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
-      //  performSegue(withIdentifier: "completeLogin", sender: nil)
-        TMDBClient.getRequestToken(completion: handleRequestTokenResponse(success:error:))
+        //  performSegue(withIdentifier: "completeLogin", sender: nil)
+        TMDBClient.getRequestToken(completion: handleRequestTokenResponse(success: Error:))
     }
     
     @IBAction func loginViaWebsiteTapped() {
         performSegue(withIdentifier: "completeLogin", sender: nil)
     }
     
-    func handleRequestTokenResponse(success: Bool, error: Error?) {
+    func handleRequestTokenResponse(success: Bool, Error: Error?) {
         if success {
             print(TMDBClient.Auth.requestToken)
-            TMDBClient.login(username: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "", completion: self.handleLoginResponse(sucess:Error:))
-        } else {
-            print(error)
+            print("success handleRequestTokenResponse")
+            TMDBClient.login(username: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "", completion: self.handleLoginResponse(success:Error:))
         }
     }
     
-    func handleLoginResponse(sucess: Bool, Error: Error?) {
+    func handleLoginResponse(success: Bool, Error: Error?) {
         print(TMDBClient.Auth.requestToken)
+        if success {
+             print("success handleLoginResponse")
+            TMDBClient.createSessionId(completion: handleSessionResponse(success:Error:))
+        }
     }
     
+    func handleSessionResponse(success: Bool, Error: Error?) {
+        if success {
+            print("success handleSessionResponse")
+            DispatchQueue.main.async {
+                 print("success handleSessionResponse 2")
+                self.performSegue(withIdentifier: "completeLogin", sender: nil)
+            }
+        }
+    }
 }
