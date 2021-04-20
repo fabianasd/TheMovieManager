@@ -24,34 +24,37 @@ class LoginViewController: UIViewController {
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
         //  performSegue(withIdentifier: "completeLogin", sender: nil)
-        TMDBClient.getRequestToken(completion: handleRequestTokenResponse(success: Error:))
+        TMDBClient.getRequestToken(completion: handleRequestTokenResponse(success: error:))
     }
     
     @IBAction func loginViaWebsiteTapped() {
-        performSegue(withIdentifier: "completeLogin", sender: nil)
+        TMDBClient.getRequestToken{ (success, error) in
+            if success {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(TMDBClient.Endpoints.webAuth.url, options: [:],
+                                              completionHandler: nil)
+                }
+            }
+        }
     }
     
-    func handleRequestTokenResponse(success: Bool, Error: Error?) {
+    func handleRequestTokenResponse(success: Bool, error: Error?) {
         if success {
             print(TMDBClient.Auth.requestToken)
-            print("success handleRequestTokenResponse")
-            TMDBClient.login(username: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "", completion: self.handleLoginResponse(success:Error:))
+            TMDBClient.login(username: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "", completion: self.handleLoginResponse(success:error:))
         }
     }
     
-    func handleLoginResponse(success: Bool, Error: Error?) {
+    func handleLoginResponse(success: Bool, error: Error?) {
         print(TMDBClient.Auth.requestToken)
         if success {
-             print("success handleLoginResponse")
-            TMDBClient.createSessionId(completion: handleSessionResponse(success:Error:))
+            TMDBClient.createSessionId(completion: handleSessionResponse(success:error:))
         }
     }
     
-    func handleSessionResponse(success: Bool, Error: Error?) {
+    func handleSessionResponse(success: Bool, error: Error?) {
         if success {
-            print("success handleSessionResponse")
             DispatchQueue.main.async {
-                 print("success handleSessionResponse 2")
                 self.performSegue(withIdentifier: "completeLogin", sender: nil)
             }
         }
