@@ -18,8 +18,8 @@ class LoginViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        emailTextField.text = ""
-        passwordTextField.text = ""
+        emailTextField.text = "fabianasd"
+        passwordTextField.text = "S3nhaTMDB"
     }
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
@@ -30,10 +30,8 @@ class LoginViewController: UIViewController {
     @IBAction func loginViaWebsiteTapped() {
         TMDBClient.getRequestToken{ (success, error) in
             if success {
-                DispatchQueue.main.async {
-                    UIApplication.shared.open(TMDBClient.Endpoints.webAuth.url, options: [:],
-                                              completionHandler: nil)
-                }
+                UIApplication.shared.open(TMDBClient.Endpoints.webAuth.url, options: [:],
+                                          completionHandler: nil)
             }
         }
     }
@@ -54,9 +52,7 @@ class LoginViewController: UIViewController {
     
     func handleSessionResponse(success: Bool, error: Error?) {
         if success {
-            DispatchQueue.main.async {
-                self.performSegue(withIdentifier: "completeLogin", sender: nil)
-            }
+            self.performSegue(withIdentifier: "completeLogin", sender: nil)
         }
     }
 }
