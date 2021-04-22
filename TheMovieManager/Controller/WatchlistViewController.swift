@@ -18,9 +18,7 @@ class WatchlistViewController: UIViewController {
       //chamada para TMDBClient. Nesse modelo a matriz resultante de filmes é definida como a matriz no modelo de filme
         _ = TMDBClient.getWatchlist() { movies, error in
             MovieModel.watchlist = movies
-            DispatchQueue.main.async { //recarregamos os dados no thread principal usando assincrono. Esta lista de observacao em o modelo do filme preenche a visualizacao da tabela
                 self.tableView.reloadData()
-            }
         }
     }
     

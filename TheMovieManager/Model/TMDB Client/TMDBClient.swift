@@ -29,6 +29,7 @@ class TMDBClient {
         case createSessionId
         case webAuth
         case logout
+        case getFavorites
         
         //... o valor associado aqui gera o caminho completo
         var stringValue: String {
@@ -39,6 +40,7 @@ class TMDBClient {
             case .createSessionId: return Endpoints.base + "/authentication/session/new" + Endpoints.apiKeyParam
             case .webAuth: return "https://www.themoviedb.org/authenticate/" + Auth.requestToken + "?redirect_to=themoviemanager:authenticate"
             case .logout: return Endpoints.base + "/authentication/session" + Endpoints.apiKeyParam
+            case .getFavorites: return Endpoints.base + "/account/\(Auth.accountId)/favorite/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             }
         }
         //esta propriedade de URL computada converte o valor da string em uma URL.
@@ -89,7 +91,7 @@ class TMDBClient {
             let decoder = JSONDecoder()
             do {
                 let responseObject = try decoder.decode(ResponseType.self, from: data)
-                DispatchQueue.main.async {
+                DispatchQueue.main.async {//recarregamos os dados no thread principal usando assincrono.
                     //se a analise JSON for bem-sucedida ou...
                     completion(responseObject, nil)
                 }
@@ -155,6 +157,17 @@ class TMDBClient {
             completion()
         }
         task.resume()
+    }
+    
+    //get
+    class func getFavorites (completion: @escaping ([Movie], Error?) -> Void) {
+        taskForGETRequest(url: Endpoints.getFavorites.url, response: MovieResults.self) { (response, error) in
+            if let response = response {
+                completion(response.results, nil)
+            } else {
+                completion([], error)
+            }
+        }
     }
     
     //get
