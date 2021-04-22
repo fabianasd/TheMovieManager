@@ -30,6 +30,7 @@ class TMDBClient {
         case webAuth
         case logout
         case getFavorites
+        case search(String)
         
         //... o valor associado aqui gera o caminho completo
         var stringValue: String {
@@ -41,6 +42,7 @@ class TMDBClient {
             case .webAuth: return "https://www.themoviedb.org/authenticate/" + Auth.requestToken + "?redirect_to=themoviemanager:authenticate"
             case .logout: return Endpoints.base + "/authentication/session" + Endpoints.apiKeyParam
             case .getFavorites: return Endpoints.base + "/account/\(Auth.accountId)/favorite/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
+            case .search(let query): return Endpoints.base + "/search/movie" + Endpoints.apiKeyParam + "&query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" //alterar os espaços por caracteres validos
             }
         }
         //esta propriedade de URL computada converte o valor da string em uma URL.
@@ -119,7 +121,7 @@ class TMDBClient {
     
     //post
     class func login(username: String, password: String, completion: @escaping (Bool, Error?) -> Void) {
-       let body = LoginRequest(username: username, password: password, requestToken: Auth.requestToken)
+        let body = LoginRequest(username: username, password: password, requestToken: Auth.requestToken)
         taskForPOSTRequest(url: Endpoints.login.url, responseType: RequestTokenResponse.self, body: body) { (response, error) in
             if let response = response {
                 Auth.requestToken = response.requestToken
@@ -135,14 +137,14 @@ class TMDBClient {
         let body = PostSession(requestToken: Auth.requestToken)
         taskForPOSTRequest(url: Endpoints.createSessionId.url, responseType: SessionResponse.self, body: body) { (response, error) in
             
-      if let response = response {
-                       Auth.sessionId = response.sessionId
-                       completion(true, nil)
-                   } else {
-                       completion(false, error)
-                   }
-               }
-           }
+            if let response = response {
+                Auth.sessionId = response.sessionId
+                completion(true, nil)
+            } else {
+                completion(false, error)
+            }
+        }
+    }
     
     //post
     class func logout(completion: @escaping () -> Void) {
@@ -160,8 +162,19 @@ class TMDBClient {
     }
     
     //get
-    class func getFavorites (completion: @escaping ([Movie], Error?) -> Void) {
+    class func getFavorites(completion: @escaping ([Movie], Error?) -> Void) {
         taskForGETRequest(url: Endpoints.getFavorites.url, response: MovieResults.self) { (response, error) in
+            if let response = response {
+                completion(response.results, nil)
+            } else {
+                completion([], error)
+            }
+        }
+    }
+    
+    //get
+    class func search(query: String, completion: @escaping ([Movie], Error?) -> Void) {
+        taskForGETRequest(url: Endpoints.search(query).url, response: MovieResults.self) { (response, error) in
             if let response = response {
                 completion(response.results, nil)
             } else {

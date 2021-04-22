@@ -19,7 +19,6 @@ class FavoritesViewController: UIViewController {
         _ = TMDBClient.getFavorites() { movies, error in
             MovieModel.favorites = movies
             self.tableView.reloadData()
-            print("chamou aqui")
         }
     }
     

@@ -18,8 +18,8 @@ class LoginViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        emailTextField.text = "fabianasd"
-        passwordTextField.text = "S3nhaTMDB"
+        emailTextField.text = ""
+        passwordTextField.text = ""
     }
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
