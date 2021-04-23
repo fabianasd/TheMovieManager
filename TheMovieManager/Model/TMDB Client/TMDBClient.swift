@@ -10,7 +10,7 @@ import Foundation
 //codigo para interagir com a API do banco de dados de filmes
 class TMDBClient {
     //propriedade estatica para a chave API
-    static let apiKey = "8b0551a273cbd9426bc0254eb7c3b05e"
+    static let apiKey = ""
     // autenticacao, é estatica e referenciada pelo nome da classe ou estrutura seguido por um ponto seguido por o nome da propridade estatica que nao pertence para qualquer instancia da classe TMDBClients
     struct Auth {
         static var accountId = 0
@@ -31,6 +31,7 @@ class TMDBClient {
         case logout
         case getFavorites
         case search(String)
+        case markWatchlist
         
         //... o valor associado aqui gera o caminho completo
         var stringValue: String {
@@ -43,6 +44,7 @@ class TMDBClient {
             case .logout: return Endpoints.base + "/authentication/session" + Endpoints.apiKeyParam
             case .getFavorites: return Endpoints.base + "/account/\(Auth.accountId)/favorite/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             case .search(let query): return Endpoints.base + "/search/movie" + Endpoints.apiKeyParam + "&query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" //alterar os espaços por caracteres validos
+            case .markWatchlist: return Endpoints.base + "/account/\(Auth.accountId)/watchlist" + Endpoints.apiKeyParam
             }
         }
         //esta propriedade de URL computada converte o valor da string em uma URL.
@@ -192,6 +194,19 @@ class TMDBClient {
                 completion(response.results, nil)
             } else {
                 completion([], error)
+            }
+        }
+    }
+    
+    //post
+    //metodo para add filme a lista
+    class func markWatchlist(movieId: Int, watchlist: Bool, completion: @escaping(Bool, Error?) -> Void) {
+        let body = MarkWatchlist(mediaType: "movie", mediaId: movieId, watchlist: watchlist)
+        taskForPOSTRequest(url: Endpoints.markWatchlist.url, responseType: TMDBResponse.self, body: body) { (response, error) in
+            if let response = response {
+                completion(response.statusCode == 1 || response.statusCode == 12 || response.statusCode == 13, nil)
+            } else {
+                completion(false, error)
             }
         }
     }
