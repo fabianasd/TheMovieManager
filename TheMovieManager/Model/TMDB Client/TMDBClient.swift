@@ -32,6 +32,7 @@ class TMDBClient {
         case getFavorites
         case search(String)
         case markWatchlist
+        case markFavorite
         
         //... o valor associado aqui gera o caminho completo
         var stringValue: String {
@@ -44,7 +45,8 @@ class TMDBClient {
             case .logout: return Endpoints.base + "/authentication/session" + Endpoints.apiKeyParam
             case .getFavorites: return Endpoints.base + "/account/\(Auth.accountId)/favorite/movies" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             case .search(let query): return Endpoints.base + "/search/movie" + Endpoints.apiKeyParam + "&query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" //alterar os espaços por caracteres validos
-            case .markWatchlist: return Endpoints.base + "/account/\(Auth.accountId)/watchlist" + Endpoints.apiKeyParam
+            case .markWatchlist: return Endpoints.base + "/account/\(Auth.accountId)/watchlist" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
+            case .markFavorite: return Endpoints.base + "/account/\(Auth.accountId)/favorite" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             }
         }
         //esta propriedade de URL computada converte o valor da string em uma URL.
@@ -203,6 +205,19 @@ class TMDBClient {
     class func markWatchlist(movieId: Int, watchlist: Bool, completion: @escaping(Bool, Error?) -> Void) {
         let body = MarkWatchlist(mediaType: "movie", mediaId: movieId, watchlist: watchlist)
         taskForPOSTRequest(url: Endpoints.markWatchlist.url, responseType: TMDBResponse.self, body: body) { (response, error) in
+            if let response = response {
+                completion(response.statusCode == 1 || response.statusCode == 12 || response.statusCode == 13, nil)
+            } else {
+                completion(false, error)
+            }
+        }
+    }
+    
+    //post
+    //metodo para add filme a lista
+    class func markFavorite(movieId: Int, favorite: Bool, completion: @escaping(Bool, Error?) -> Void) {
+        let body = MarkFavorite(mediaType: "movie", mediaId: movieId, favorite: favorite)
+        taskForPOSTRequest(url: Endpoints.markFavorite.url, responseType: TMDBResponse.self, body: body) { (response, error) in
             if let response = response {
                 completion(response.statusCode == 1 || response.statusCode == 12 || response.statusCode == 13, nil)
             } else {

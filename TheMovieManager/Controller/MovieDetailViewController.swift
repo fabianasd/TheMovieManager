@@ -50,7 +50,19 @@ class MovieDetailViewController: UIViewController {
     }
     
     @IBAction func favoriteButtonTapped(_ sender: UIBarButtonItem) {
-
+        //quando o botão é tocado, verifica-se se o filme já esta na watchlist e em seguida negue (!isFavorite) o valor para adicionar ou remover da lista de monitoramento
+        TMDBClient.markFavorite(movieId: movie.id, favorite: !isFavorite, completion: handleFavoriteResponse(success: error:))
+    }
+    
+    func handleFavoriteResponse(success: Bool, error: Error?) {
+        if success { //se já esta na lista...
+            if isFavorite { //...apenas fitre
+                       MovieModel.favorites = MovieModel.favorites.filter() { $0 != self.movie}
+                   } else {
+                       MovieModel.favorites.append(movie) // senão acrescente
+                   }
+                   toggleBarButton(favoriteBarButtonItem, enabled: isFavorite)
+               }
     }
     
     func toggleBarButton(_ button: UIBarButtonItem, enabled: Bool) {
