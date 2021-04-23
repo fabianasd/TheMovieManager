@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 //codigo para interagir com a API do banco de dados de filmes
 class TMDBClient {
     //propriedade estatica para a chave API
@@ -33,6 +34,7 @@ class TMDBClient {
         case search(String)
         case markWatchlist
         case markFavorite
+        case posterImage(String)
         
         //... o valor associado aqui gera o caminho completo
         var stringValue: String {
@@ -47,6 +49,7 @@ class TMDBClient {
             case .search(let query): return Endpoints.base + "/search/movie" + Endpoints.apiKeyParam + "&query=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" //alterar os espaços por caracteres validos
             case .markWatchlist: return Endpoints.base + "/account/\(Auth.accountId)/watchlist" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
             case .markFavorite: return Endpoints.base + "/account/\(Auth.accountId)/favorite" + Endpoints.apiKeyParam + "&session_id=\(Auth.sessionId)"
+            case .posterImage(let posterPath): return "https://image.tmdb.org/t/p/w500/" + posterPath
             }
         }
         //esta propriedade de URL computada converte o valor da string em uma URL.
@@ -224,5 +227,14 @@ class TMDBClient {
                 completion(false, error)
             }
         }
+    }
+    
+        class func downloadPosterImage(path: String, completion: @escaping (Data?, Error?) -> Void) {
+        let task = URLSession.shared.dataTask(with: Endpoints.posterImage(path).url) { data, response, error in
+            DispatchQueue.main.async {
+                completion(data, error)
+            }
+        }
+        task.resume()
     }
 }
