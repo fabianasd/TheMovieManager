@@ -15,10 +15,10 @@ class WatchlistViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-      //chamada para TMDBClient. Nesse modelo a matriz resultante de filmes é definida como a matriz no modelo de filme
+        //chamada para TMDBClient. Nesse modelo a matriz resultante de filmes é definida como a matriz no modelo de filme
         _ = TMDBClient.getWatchlist() { movies, error in
             MovieModel.watchlist = movies
-                self.tableView.reloadData()
+            self.tableView.reloadData()
         }
     }
     
@@ -53,14 +53,25 @@ extension WatchlistViewController: UITableViewDataSource, UITableViewDelegate {
         let movie = MovieModel.watchlist[indexPath.row]
         
         cell.textLabel?.text = movie.title
-        
+        //adiciona a imagem na tableview
+        if let posterPath = movie.posterPath {
+            TMDBClient.downloadPosterImage(path: posterPath) { ( data, error) in
+                guard let data = data else {
+                    return
+                }
+                let image = UIImage(data: data)
+                cell.imageView?.image = image
+                cell.setNeedsLayout() //atualiza a celula para que as imagens apareçam
+            }
+        }
         return cell
     }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedIndex = indexPath.row
-        performSegue(withIdentifier: "showDetail", sender: nil)
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
+
+
+func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    selectedIndex = indexPath.row
+    performSegue(withIdentifier: "showDetail", sender: nil)
+    tableView.deselectRow(at: indexPath, animated: true)
+}
+
 }

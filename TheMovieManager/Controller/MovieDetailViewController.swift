@@ -33,7 +33,7 @@ class MovieDetailViewController: UIViewController {
         toggleBarButton(favoriteBarButtonItem, enabled: isFavorite)
         
         if let posterPath = movie.posterPath {
-            TMDBClient.downloadPosterImage(path: posterPath) { data, error in
+            TMDBClient.downloadPosterImage(path: posterPath) { (data, error) in
                 guard let data = data else {
                     return
                 }
