@@ -22,6 +22,7 @@ class LoginViewController: UIViewController {
         emailTextField.text = ""
         passwordTextField.text = ""
     }
+    
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
         //  performSegue(withIdentifier: "completeLogin", sender: nil)
@@ -42,7 +43,11 @@ class LoginViewController: UIViewController {
     func handleRequestTokenResponse(success: Bool, error: Error?) {
         if success {
             print(TMDBClient.Auth.requestToken)
-            TMDBClient.login(username: self.emailTextField.text ?? "", password: self.passwordTextField.text ?? "", completion: self.handleLoginResponse(success:error:))
+            TMDBClient.login(username: self.emailTextField.text ?? "",
+                             password: self.passwordTextField.text ?? "",
+                             completion: self.handleLoginResponse(success:error:))
+        } else {//valida token
+            showLoginFailure(message: error?.localizedDescription ?? "")
         }
     }
     
@@ -50,13 +55,18 @@ class LoginViewController: UIViewController {
         print(TMDBClient.Auth.requestToken)
         if success {
             TMDBClient.createSessionId(completion: handleSessionResponse(success:error:))
+        } else {//valida email e senha
+            showLoginFailure(message: error?.localizedDescription ?? "")
         }
     }
+    
     
     func handleSessionResponse(success: Bool, error: Error?) {
         setLoggingIn(false)
         if success {
             self.performSegue(withIdentifier: "completeLogin", sender: nil)
+        } else { //valida email e senha
+            showLoginFailure(message: error?.localizedDescription ?? "")
         }
     }
     
@@ -70,5 +80,11 @@ class LoginViewController: UIViewController {
         passwordTextField.isEnabled = !loggingIn
         loginButton.isEnabled = !loggingIn
         loginViaWebsiteButton.isEnabled = !loggingIn
+    }
+    
+    func showLoginFailure(message: String) { //valida tentativa de login falha
+        let alertVC = UIAlertController(title: "Login Failed", message: message, preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        show(alertVC, sender: nil)
     }
 }
