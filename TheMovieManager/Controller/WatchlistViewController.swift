@@ -53,6 +53,8 @@ extension WatchlistViewController: UITableViewDataSource, UITableViewDelegate {
         let movie = MovieModel.watchlist[indexPath.row]
         
         cell.textLabel?.text = movie.title
+        cell.imageView?.image = UIImage(named: "PosterPlacehoder") //imagem padrao da pasta assests
+        
         //adiciona a imagem na tableview
         if let posterPath = movie.posterPath {
             TMDBClient.downloadPosterImage(path: posterPath) { ( data, error) in
@@ -66,12 +68,12 @@ extension WatchlistViewController: UITableViewDataSource, UITableViewDelegate {
         }
         return cell
     }
-
-
-func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    selectedIndex = indexPath.row
-    performSegue(withIdentifier: "showDetail", sender: nil)
-    tableView.deselectRow(at: indexPath, animated: true)
-}
-
+    
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedIndex = indexPath.row
+        performSegue(withIdentifier: "showDetail", sender: nil)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
 }

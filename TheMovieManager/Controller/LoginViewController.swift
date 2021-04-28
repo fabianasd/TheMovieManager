@@ -14,6 +14,7 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var loginButton: UIButton!
     @IBOutlet weak var loginViaWebsiteButton: UIButton!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -24,10 +25,12 @@ class LoginViewController: UIViewController {
     //IBActions para os botoes, no momento isso segue para o resto do aplicativo, mas o usuario nao esta realmente conectado
     @IBAction func loginTapped(_ sender: UIButton) {
         //  performSegue(withIdentifier: "completeLogin", sender: nil)
+        setLoggingIn(true)
         TMDBClient.getRequestToken(completion: handleRequestTokenResponse(success: error:))
     }
     
     @IBAction func loginViaWebsiteTapped() {
+        setLoggingIn(true)
         TMDBClient.getRequestToken{ (success, error) in
             if success {
                 UIApplication.shared.open(TMDBClient.Endpoints.webAuth.url, options: [:],
@@ -51,8 +54,21 @@ class LoginViewController: UIViewController {
     }
     
     func handleSessionResponse(success: Bool, error: Error?) {
+        setLoggingIn(false)
         if success {
             self.performSegue(withIdentifier: "completeLogin", sender: nil)
         }
+    }
+    
+    func setLoggingIn(_ loggingIn: Bool) {
+        if loggingIn {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
+        emailTextField.isEnabled = !loggingIn //o botão fica desabilitado
+        passwordTextField.isEnabled = !loggingIn
+        loginButton.isEnabled = !loggingIn
+        loginViaWebsiteButton.isEnabled = !loggingIn
     }
 }

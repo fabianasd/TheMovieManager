@@ -53,6 +53,8 @@ extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
         let movie = MovieModel.favorites[indexPath.row]
         
         cell.textLabel?.text = movie.title
+        cell.imageView?.image = UIImage(named: "PosterPlacehoder") //imagem padrao da pasta assests
+        
         //adiciona a imagem na tableview
         if let posterPath = movie.posterPath {
             TMDBClient.downloadPosterImage(path: posterPath) { ( data, error) in
